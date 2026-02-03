@@ -80,4 +80,93 @@
 
 <div class="game-area" id="gameArea">
   <div class="huat-zone"></div>
-  <div class="orange" id="orange">🍊
+  <div class="orange" id="orange">🍊</div>
+</div>
+
+<button id="stopBtn">STOP</button>
+
+<div class="result" id="result"></div>
+
+<script>
+  const orange = document.getElementById("orange");
+  const stopBtn = document.getElementById("stopBtn");
+  const result = document.getElementById("result");
+  const gameArea = document.getElementById("gameArea");
+  const huat = document.querySelector(".huat-zone");
+
+  let position = -40;
+  let speed = 3; // HARD MODE SPEED
+  let moving = true;
+
+  // TRIES (MAX 5)
+  let tries = parseInt(localStorage.getItem("tries")) || 0;
+
+  // WINNERS (MAX 10)
+  let winners = parseInt(localStorage.getItem("winners")) || 0;
+
+  if (tries >= 5) {
+    stopBtn.disabled = true;
+    result.innerHTML = "❌ You have used all 5 tries.";
+  }
+
+  function moveOrange() {
+    if (!moving) return;
+
+    position += speed;
+    orange.style.left = position + "px";
+
+    if (position > gameArea.offsetWidth) {
+      position = -40;
+    }
+
+    requestAnimationFrame(moveOrange);
+  }
+
+  moveOrange();
+
+  stopBtn.onclick = () => {
+    if (tries >= 5) return;
+
+    moving = false;
+    stopBtn.disabled = true;
+
+    tries++;
+    localStorage.setItem("tries", tries);
+
+    const orangeRect = orange.getBoundingClientRect();
+    const huatRect = huat.getBoundingClientRect();
+
+    const orangeX = orangeRect.left + orangeRect.width / 2;
+    const orangeY = orangeRect.top + orangeRect.height / 2;
+
+    const huatX = huatRect.left + huatRect.width / 2;
+    const huatY = huatRect.top + huatRect.height / 2;
+
+    const distance = Math.sqrt(
+      Math.pow(orangeX - huatX, 2) +
+      Math.pow(orangeY - huatY, 2)
+    );
+
+    const radius = huatRect.width / 2;
+
+    if (distance <= radius && winners < 10) {
+      winners++;
+      localStorage.setItem("winners", winners);
+      result.innerHTML = "🧧 HUAT!<br>Screenshot & comment <b>HUAT</b> to claim!";
+    } 
+    else if (winners >= 10) {
+      result.innerHTML = "🎁 All prizes have been claimed.<br>Thanks for playing!";
+    } 
+    else {
+      result.innerHTML = `😆 So close!<br>${5 - tries} tries left`;
+      setTimeout(() => {
+        moving = true;
+        stopBtn.disabled = false;
+        moveOrange();
+      }, 800);
+    }
+  };
+</script>
+
+</body>
+</html>
