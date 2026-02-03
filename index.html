@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orange Stop Challenge</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #b40000;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 { margin-bottom: 10px; }
+
+  .game-area {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    height: 120px;
+    margin: 30px auto;
+    background: #8b0000;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .huat-zone {
+    position: absolute;
+    left: 45%;
+    width: 10%;
+    height: 100%;
+    border: 3px solid gold;
+    box-sizing: border-box;
+  }
+
+  .orange {
+    position: absolute;
+    top: 35px;
+    font-size: 32px;
+    left: -40px;
+  }
+
+  button {
+    padding: 12px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    background: gold;
+    color: #8b0000;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .result {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>🍊 Orange Stop Challenge</h1>
+<p>Tap STOP at the right timing.<br><strong>Only 10 winners!</strong></p>
+
+<div class="game-area" id="gameArea">
+  <div class="huat-zone"></div>
+  <div class="orange" id="orange">🍊</div>
+</div>
+
+<button id="stopBtn">STOP</button>
+
+<div class="result" id="result"></div>
+
+<script>
+  const orange = document.getElementById("orange");
+  const stopBtn = document.getElementById("stopBtn");
+  const result = document.getElementById("result");
+  const gameArea = document.getElementById("gameArea");
+
+  let position = -40;
+  let speed = 3; // HARD MODE SPEED
+  let moving = true;
+
+  // One attempt per device
+  if (localStorage.getItem("played")) {
+    stopBtn.disabled = true;
+    result.innerHTML = "❌ You have already played.";
+  }
+
+  // Winner counter (shared via browser — simple, acceptable for campaign)
+  let winners = localStorage.getItem("winners") || 0;
+
+  function moveOrange() {
+    if (!moving) return;
+
+    position += speed;
+    orange.style.left = position + "px";
+
+    if (position > gameArea.offsetWidth) {
+      position = -40;
+    }
+
+    requestAnimationFrame(moveOrange);
+  }
+
+  moveOrange();
+
+  stopBtn.onclick = () => {
+    if (localStorage.getItem("played")) return;
+
+    moving = false;
+    stopBtn.disabled = true;
+    localStorage.setItem("played", "yes");
+
+    const areaWidth = gameArea.offsetWidth;
+    const orangeCenter = position + 16;
+    const huatStart = areaWidth * 0.45;
+    const huatEnd = areaWidth * 0.55;
+
+    if (orangeCenter >= huatStart && orangeCenter <= huatEnd && winners < 10) {
+      winners++;
+      localStorage.setItem("winners", winners);
+      result.innerHTML = "🧧 HUAT!<br>Screenshot & comment <b>HUAT</b> to claim!";
+    } else if (winners >= 10) {
+      result.innerHTML = "🎁 All prizes have been claimed.<br>Thanks for playing!";
+    } else {
+      result.innerHTML = "😆 So close!<br>Better luck next time.";
+    }
+  };
+</script>
+
+</body>
+</html>
