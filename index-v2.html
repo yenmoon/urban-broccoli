@@ -6,166 +6,138 @@
 <title>Orange Stop Challenge</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #b40000;
-    color: #fff;
-    text-align: center;
-    margin: 0;
-    padding: 20px;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #b40000;
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
 
-  h1 {
-    margin-bottom: 10px;
-  }
+.game-area {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: 140px;
+  margin: 30px auto;
+  background: #8b0000;
+  border-radius: 10px;
+  overflow: hidden;
+}
 
-  .game-area {
-    position: relative;
-    width: 100%;
-    max-width: 360px;
-    height: 140px;
-    margin: 30px auto;
-    background: #8b0000;
-    border-radius: 10px;
-    overflow: hidden;
-  }
+/* Circle HUAT zone */
+.huat-zone {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  border: 3px solid gold;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
 
-  /* CIRCLE HUAT ZONE */
-  .huat-zone {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 60px;
-    height: 60px;
-    border: 3px solid gold;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-sizing: border-box;
-  }
+.orange {
+  position: absolute;
+  top: 54px;
+  font-size: 32px;
+  left: -40px;
+}
 
-  .orange {
-    position: absolute;
-    top: 54px;
-    font-size: 32px;
-    left: -40px;
-  }
+button {
+  padding: 12px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  background: gold;
+  color: #8b0000;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-  button {
-    padding: 12px 30px;
-    font-size: 18px;
-    border: none;
-    border-radius: 6px;
-    background: gold;
-    color: #8b0000;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-  }
-
-  .result {
-    margin-top: 20px;
-    font-size: 18px;
-  }
+.result {
+  margin-top: 20px;
+  font-size: 18px;
+}
 </style>
 </head>
 
 <body>
 
 <h1>🍊 Orange Stop Challenge</h1>
-<p>Tap STOP with perfect timing.<br><strong>Only 10 winners · 5 tries</strong></p>
+<p>Tap STOP at the right timing<br><b>Only 10 winners · 5 tries</b></p>
 
 <div class="game-area" id="gameArea">
-  <div class="huat-zone"></div>
+  <div class="huat-zone" id="huat"></div>
   <div class="orange" id="orange">🍊</div>
 </div>
 
 <button id="stopBtn">STOP</button>
-
 <div class="result" id="result"></div>
 
 <script>
-  const orange = document.getElementById("orange");
-  const stopBtn = document.getElementById("stopBtn");
-  const result = document.getElementById("result");
-  const gameArea = document.getElementById("gameArea");
-  const huat = document.querySelector(".huat-zone");
+/* VERSIONED STORAGE (IMPORTANT) */
+const TRY_KEY = "v2_tries";
+const WIN_KEY = "v2_winners";
 
-  let position = -40;
-  let speed = 3; // HARD MODE SPEED
-  let moving = true;
+const orange = document.getElementById("orange");
+const huat = document.getElementById("huat");
+const stopBtn = document.getElementById("stopBtn");
+const result = document.getElementById("result");
+const gameArea = document.getElementById("gameArea");
 
-  // TRIES (MAX 5)
-  let tries = parseInt(localStorage.getItem("tries")) || 0;
+let pos = -40;
+let speed = 3;
+let moving = true;
 
-  // WINNERS (MAX 10)
-  let winners = parseInt(localStorage.getItem("winners")) || 0;
+let tries = Number(localStorage.getItem(TRY_KEY)) || 0;
+let winners = Number(localStorage.getItem(WIN_KEY)) || 0;
 
+function move() {
+  if (!moving) return;
+  pos += speed;
+  if (pos > gameArea.offsetWidth) pos = -40;
+  orange.style.left = pos + "px";
+  requestAnimationFrame(move);
+}
+move();
+
+stopBtn.onclick = () => {
   if (tries >= 5) {
-    stopBtn.disabled = true;
-    result.innerHTML = "❌ You have used all 5 tries.";
+    result.innerHTML = "❌ All tries used";
+    return;
   }
 
-  function moveOrange() {
-    if (!moving) return;
+  moving = false;
+  tries++;
+  localStorage.setItem(TRY_KEY, tries);
 
-    position += speed;
-    orange.style.left = position + "px";
+  const o = orange.getBoundingClientRect();
+  const h = huat.getBoundingClientRect();
 
-    if (position > gameArea.offsetWidth) {
-      position = -40;
-    }
+  const dx = (o.left + o.width/2) - (h.left + h.width/2);
+  const dy = (o.top + o.height/2) - (h.top + h.height/2);
+  const dist = Math.sqrt(dx*dx + dy*dy);
 
-    requestAnimationFrame(moveOrange);
+  if (dist <= h.width/2 && winners < 10) {
+    winners++;
+    localStorage.setItem(WIN_KEY, winners);
+    result.innerHTML = "🧧 HUAT! Screenshot & comment HUAT";
+    return;
   }
 
-  moveOrange();
+  if (winners >= 10) {
+    result.innerHTML = "🎁 All prizes claimed";
+    return;
+  }
 
-  stopBtn.onclick = () => {
-    if (tries >= 5) return;
-
-    moving = false;
-    stopBtn.disabled = true;
-
-    tries++;
-    localStorage.setItem("tries", tries);
-
-    const orangeRect = orange.getBoundingClientRect();
-    const huatRect = huat.getBoundingClientRect();
-
-    const orangeX = orangeRect.left + orangeRect.width / 2;
-    const orangeY = orangeRect.top + orangeRect.height / 2;
-
-    const huatX = huatRect.left + huatRect.width / 2;
-    const huatY = huatRect.top + huatRect.height / 2;
-
-    const distance = Math.sqrt(
-      Math.pow(orangeX - huatX, 2) +
-      Math.pow(orangeY - huatY, 2)
-    );
-
-    const radius = huatRect.width / 2;
-
-    if (distance <= radius && winners < 10) {
-      winners++;
-      localStorage.setItem("winners", winners);
-      result.innerHTML = "🧧 HUAT!<br>Screenshot & comment <b>HUAT</b> to claim!";
-    } 
-    else if (winners >= 10) {
-      result.innerHTML = "🎁 All prizes have been claimed.<br>Thanks for playing!";
-    } 
-    else {
-      result.innerHTML = `😆 So close!<br>${5 - tries} tries left`;
-      setTimeout(() => {
-        moving = true;
-        stopBtn.disabled = false;
-        moveOrange();
-      }, 800);
-    }
-  };
+  result.innerHTML = `😆 Missed! ${5 - tries} tries left`;
+  setTimeout(() => {
+    moving = true;
+    move();
+  }, 800);
+};
 </script>
 
 </body>
