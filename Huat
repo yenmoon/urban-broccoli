@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orange Stop Challenge</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #b40000;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  .game-area {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    height: 140px;
+    margin: 30px auto;
+    background: #8b0000;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* CIRCLE HUAT ZONE */
+  .huat-zone {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    border: 3px solid gold;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+  }
+
+  .orange {
+    position: absolute;
+    top: 54px;
+    font-size: 32px;
+    left: -40px;
+  }
+
+  button {
+    padding: 12px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    background: gold;
+    color: #8b0000;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .result {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>🍊 Orange Stop Challenge</h1>
+<p>Tap STOP with perfect timing.<br><strong>Only 10 winners · 5 tries</strong></p>
+
+<div class="game-area" id="gameArea">
+  <div class="huat-zone"></div>
+  <div class="orange" id="orange">🍊
